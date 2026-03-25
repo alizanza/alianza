@@ -1,0 +1,37 @@
+@font-face {
+    font-family: __CIBFontBold_c70bac;
+    src: url(/_next/static/media/1531319829a35f77-s.p.woff) format("woff");
+    font-display: swap
+}
+
+@font-face {
+    font-family: __CIBFontBold_Fallback_c70bac;
+    src: local("Arial");
+    ascent-override: 96.52%;
+    descent-override: 28.62%;
+    line-gap-override: 0.00%;
+    size-adjust: 100.82%
+}
+
+.__className_c70bac {
+    font-family: __CIBFontBold_c70bac, __CIBFontBold_Fallback_c70bac
+}
+
+@font-face {
+    font-family: __CIBFont_ae8c81;
+    src: url(/_next/static/media/3efa30bd4eed9d25-s.p.ttf) format("truetype");
+    font-display: swap
+}
+
+@font-face {
+    font-family: __CIBFont_Fallback_ae8c81;
+    src: local("Arial");
+    ascent-override: 98.57%;
+    descent-override: 29.78%;
+    line-gap-override: 0.00%;
+    size-adjust: 97.40%
+}
+
+.__className_ae8c81 {
+    font-family: __CIBFont_ae8c81, __CIBFont_Fallback_ae8c81
+}
